@@ -34,6 +34,34 @@ import org.opencv.core.Mat;
 import java.io.IOException;
 
 public class CameraStreamer {
+
+    public class MovingAverage {
+        private int end = 0;
+        private int length = 0;
+        private final int numValues;
+        private long sum = 0;
+        private final long[] values;
+
+        MovingAverage(int numValues) {
+            this.numValues = numValues;
+            this.values = new long[numValues];
+        }
+
+        public void update(long value) {
+            this.sum -= this.values[this.end];
+            this.values[this.end] = value;
+            this.end = (this.end + 1) % this.numValues;
+            if (this.length < this.numValues) {
+                this.length++;
+            }
+            this.sum += value;
+        }
+
+        public double getAverage() {
+            return ((double) this.sum) / ((double) this.length);
+        }
+    }
+
     private static final long OPEN_CAMERA_POLLING_INTERVAL_MS = 1000;
     private static final String TAG = CameraStreamer.class.getSimpleName();
     private long lastTimestamp = Long.MIN_VALUE;
@@ -175,7 +203,7 @@ public class CameraStreamer {
         if (this.lastTimestamp != Long.MIN_VALUE) {
             this.averageSpf.update(timestampSeconds - this.lastTimestamp);
             if (this.numFrames % 10 == 9) {
-                Log.d(TAG, "FPS: " + (1.0d / this.averageSpf.getAverage()));
+                Log.d(TAG, "FramePerSecond= " + (1.0d / this.averageSpf.getAverage()));
             }
         }
         this.lastTimestamp = timestampSeconds;

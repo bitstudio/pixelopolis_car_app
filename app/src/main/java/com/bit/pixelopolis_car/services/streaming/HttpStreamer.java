@@ -22,7 +22,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
-public class HttpStreamer {
+class HttpStreamer {
+
     private static final String BOUNDARY = "--gc0p4Jq0M2Yt08jU534c0p--";
     private static final String BOUNDARY_LINES = "\r\n"+BOUNDARY+"\r\n";
     private static final String HTTP_HEADER = "HTTP/1.0 200 OK\r\nServer: Streamer\r\nConnection: close\r\nMax-Age: 0\r\nExpires: 0\r\nCache-Control: no-store, no-cache, must-revalidate, pre-check=0, post-check=0, max-age=0\r\nPragma: no-cache\r\nAccess-Control-Allow-Origin:*\r\nContent-Type: multipart/x-mixed-replace; boundary="+BOUNDARY+"\r\n\r\n"+BOUNDARY+"\r\n";
@@ -46,20 +47,16 @@ public class HttpStreamer {
         this.bufferB = new byte[bufferSize];
     }
 
-    public void start() {
+    void start() {
         if (this.running) {
             throw new IllegalStateException("HttpStreamer is already running");
         }
         this.running = true;
-        this.worker = new Thread(new Runnable() {
-            public void run() {
-                HttpStreamer.this.workerRun();
-            }
-        });
+        this.worker = new Thread(HttpStreamer.this::workerRun);
         this.worker.start();
     }
 
-    public void stop() {
+    void stop() {
         if (!this.running) {
             throw new IllegalStateException("HttpStreamer is already stopped");
         }
@@ -67,7 +64,7 @@ public class HttpStreamer {
         this.worker.interrupt();
     }
 
-    public void streamJpeg(byte[] jpeg, int length, long timestamp) {
+    void streamJpeg(byte[] jpeg, int length, long timestamp) {
         byte[] buffer;
         synchronized (this.bufferLock) {
             if (this.streamingBufferA) {
@@ -85,7 +82,7 @@ public class HttpStreamer {
         }
     }
 
-    public void workerRun() {
+    private void workerRun() {
         while (this.running) {
             try {
                 acceptAndStream();
@@ -97,13 +94,12 @@ public class HttpStreamer {
         }
     }
 
-    private void acceptAndStream() throws IOException , Throwable{
+    private void acceptAndStream() throws Throwable{
         byte[] buffer;
         int length;
         long timestamp;
-        ServerSocket serverSocket = null;
+        ServerSocket serverSocket;
         Socket socket = null;
-        DataOutputStream stream = null;
         Throwable th;
         try {
             ServerSocket serverSocket2 = new ServerSocket(this.port);
@@ -111,63 +107,30 @@ public class HttpStreamer {
                 serverSocket2.setSoTimeout(1000);
                 do {
                     socket = serverSocket2.accept();
-                    continue;
                 } while (socket == null);
             } catch (SocketTimeoutException e) {
                 if (!this.running) {
-                    if (stream != null) {
-                        try {
-                            stream.close();
-                        } catch (IOException closingStream) {
-                            System.err.println(closingStream);
-                        }
+                    try {
+                        serverSocket2.close();
+                    } catch (IOException closingServerSocket) {
+                        System.err.println(closingServerSocket);
                     }
-                    if (socket != null) {
-                        try {
-                            socket.close();
-                        } catch (IOException closingSocket) {
-                            System.err.println(closingSocket);
-                        }
-                    }
-                    if (serverSocket2 != null) {
-                        try {
-                            serverSocket2.close();
-                        } catch (IOException closingServerSocket) {
-                            System.err.println(closingServerSocket);
-                        }
-                    }
-                    ServerSocket serverSocket3 = serverSocket2;
                     return;
                 }
             } catch (Throwable th1) {
                 th = th1;
                 serverSocket = serverSocket2;
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException closingStream2) {
-                        System.err.println(closingStream2);
-                    }
-                }
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException closingSocket2) {
-                        System.err.println(closingSocket2);
-                    }
-                }
-                if (serverSocket != null) {
-                    try {
-                        serverSocket.close();
-                    } catch (IOException closingServerSocket2) {
-                        System.err.println(closingServerSocket2);
-                    }
+                try {
+                    serverSocket.close();
+                } catch (IOException closingServerSocket2) {
+                    System.err.println(closingServerSocket2);
                 }
                 throw th;
             }
             serverSocket2.close();
-            serverSocket = null;
-            DataOutputStream stream2 = new DataOutputStream(socket.getOutputStream());
+            DataOutputStream stream2;
+            assert socket != null;
+            stream2 = new DataOutputStream(socket.getOutputStream());
             try {
                 stream2.writeBytes(HTTP_HEADER);
                 stream2.flush();
@@ -177,28 +140,16 @@ public class HttpStreamer {
                             try {
                                 this.bufferLock.wait();
                             } catch (InterruptedException e2) {
-                                if (stream2 != null) {
-                                    try {
-                                        stream2.close();
-                                    } catch (IOException closingStream3) {
-                                        System.err.println(closingStream3);
-                                    }
+                                try {
+                                    stream2.close();
+                                } catch (IOException closingStream3) {
+                                    System.err.println(closingStream3);
                                 }
-                                if (socket != null) {
-                                    try {
-                                        socket.close();
-                                    } catch (IOException closingSocket3) {
-                                        System.err.println(closingSocket3);
-                                    }
+                                try {
+                                    socket.close();
+                                } catch (IOException closingSocket3) {
+                                    System.err.println(closingSocket3);
                                 }
-                                if (serverSocket != null) {
-                                    try {
-                                        serverSocket.close();
-                                    } catch (IOException closingServerSocket3) {
-                                        System.err.println(closingServerSocket3);
-                                    }
-                                }
-                                DataOutputStream dataOutputStream = stream2;
                                 return;
                             }
                         }
@@ -219,40 +170,20 @@ public class HttpStreamer {
                     stream2.writeBytes(BOUNDARY_LINES);
                     stream2.flush();
                 }
-                if (stream2 != null) {
-                    try {
-                        stream2.close();
-                    } catch (IOException closingStream4) {
-                        System.err.println(closingStream4);
-                    }
+                try {
+                    stream2.close();
+                } catch (IOException closingStream4) {
+                    System.err.println(closingStream4);
                 }
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException closingSocket4) {
-                        System.err.println(closingSocket4);
-                    }
+                try {
+                    socket.close();
+                } catch (IOException closingSocket4) {
+                    System.err.println(closingSocket4);
                 }
-                if (serverSocket != null) {
-                    try {
-                        serverSocket.close();
-                    } catch (IOException closingServerSocket4) {
-                        System.err.println(closingServerSocket4);
-                    }
-                }
-                DataOutputStream dataOutputStream2 = stream2;
-            } catch (Throwable th2) {
-                th = th2;
-                stream = stream2;
+            } catch (Throwable ignored) {
             }
         } catch (Throwable th3) {
             th = th3;
-            if (stream != null) {
-            }
-            if (socket != null) {
-            }
-            if (serverSocket != null) {
-            }
             throw th;
         }
     }
