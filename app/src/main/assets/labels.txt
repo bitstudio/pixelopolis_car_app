@@ -1,0 +1,16 @@
+???
+Cross
+Left
+Speed_limit
+One_way
+Sign01
+Plane
+Stop_sign
+Hand
+No_parking
+Traffic_light
+Bump
+Go
+Left_or_through
+Slow
+Car

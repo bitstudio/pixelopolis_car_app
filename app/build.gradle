@@ -1,0 +1,54 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+    defaultConfig {
+        applicationId "com.bit.pixelopolis_car"
+        minSdkVersion 24
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    aaptOptions {
+        noCompress "tflite"
+        noCompress "lite"
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.6.2'
+
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+
+    implementation 'com.github.kai-morich:usb-serial-for-android:1.7.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation "com.airbnb.android:lottie:3.0.7"
+    implementation 'com.google.firebase:firebase-analytics:17.2.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    // opencv 3.4.4 with contribution packages
+    implementation 'com.quickbirdstudios:opencv:3.4.4-contrib'
+    // tensorflow cpu and gpu
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
+}
+
+apply plugin: 'com.google.gms.google-services'

@@ -1,0 +1,22 @@
+ {
+    "0": {"name":"Hand","piority":0},
+    "1": {"name":"Go","piority":1},
+    "2": {"name":"Slow","piority":2},
+    "3": {"name":"Speed_limit","piority":3},
+    "4": {"name":"No_parking","piority":4},
+    "5": {"name":"Left","piority":5},
+    "6": {"name":"Cross","piority":6},
+    "7": {"name":"Plane","piority":7},
+    "8": {"name":"Bump","piority":8},
+    "9": {"name":"Stop_sign","piority":9},
+    "10": {"name":"Traffic_light","piority":10},
+    "11": {"name":"Left_or_through","piority":11},
+    "12": {"name":"Sign01","piority":12},
+    "13": {"name":"One_way","piority":13},
+    "14": {"name":"Car","piority":19},
+    "15": {"name":"Tokyo_tower","piority":14},
+    "16": {"name":"Korean","piority":15},
+    "17": {"name":"Church","piority":16},
+    "18": {"name":"Planetarium","piority":17},
+    "19": {"name":"Museum","piority":18}
+  }
